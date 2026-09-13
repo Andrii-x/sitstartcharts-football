@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SitStartCharts — Football Prototype</title>
+<style>
+  :root{
+    --bg:#0a0c12; --panel:#101318; --panel2:#0d1015; --border:rgba(255,255,255,.08);
+    --text:#e8e9ec; --muted:#73767e; --muted2:#5c5f66; --green:#34c782;
+    --green2:rgba(52,199,130,.15); --yellow:#e6c346; --red:#e84e4e; --blue:#637aa8;
+    --shadow:0 18px 60px rgba(0,0,0,.28);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#16181d 0%,#0c0d10 55%,#08090b 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100%}
+  body{padding:28px 18px 64px}
+  button,input{font:inherit}
+  button{color:inherit}
+  .app{max-width:1200px;margin:0 auto}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+  .brand{flex:1;min-width:0}
+  .brand-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .logo{font-family:"Arial Narrow",Inter,sans-serif;font-weight:800;font-size:30px;letter-spacing:-.02em;line-height:1;cursor:pointer}
+  .product-name{margin-top:6px;color:#9da1a9;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+  .logo span{color:var(--green)}
+  .updated{font:10px/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted2);text-align:right}
+  .controls{display:flex;align-items:center;gap:10px;min-width:0}
+  .search{width:240px;display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:6px}
+  .search span{color:var(--muted)}
+  .search input{width:100%;background:transparent;border:0;outline:0;color:var(--text);font-size:12.5px}
+  .search input::placeholder{color:#666a72}
+  .signin{border:1px solid rgba(52,199,130,.45);background:rgba(52,199,130,.12);color:var(--green);border-radius:6px;padding:8px 12px;font-family:"Arial Narrow",Inter,sans-serif;font-size:10px;font-weight:800;letter-spacing:.04em;cursor:pointer}
+  .signin:hover{background:rgba(52,199,130,.18)}
+  .banner{margin-bottom:14px;border:1px solid var(--border);background:rgba(255,255,255,.02);border-radius:6px;overflow:hidden}
+  .banner button{width:100%;border:0;background:transparent;text-align:left;cursor:pointer;padding:9px 13px;display:flex;align-items:center;gap:8px}
+  .banner strong{font-family:"Arial Narrow",Inter,sans-serif;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#9a9da4}
+  .chev{color:var(--muted2);font-size:14px;transition:transform .18s ease}
+  .banner.open .chev,.section.open .chev,.player.open .chev{transform:rotate(90deg)}
+  .banner-copy{display:none;padding:0 14px 12px;color:#878b94;font-size:10.5px;line-height:1.55}
+  .banner.open .banner-copy{display:block}
+  .tabs-wrap{margin-bottom:12px}
+  .position-tabs{display:flex;gap:6px;flex-wrap:wrap}
+  .pill{border:1px solid var(--border);background:rgba(255,255,255,.02);padding:6px 11px;border-radius:5px;color:#9da1a9;font-family:"Arial Narrow",Inter,sans-serif;font-weight:800;font-size:10px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
+  .pill.active{background:rgba(52,199,130,.12);border-color:rgba(52,199,130,.38);color:var(--green)}
+  .overview{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 14px}
+  .overview-card{border:1px solid var(--border);background:rgba(255,255,255,.025);border-radius:6px;padding:12px 14px}
+  .overview-card span{display:block;color:var(--muted);font:9px ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:uppercase;letter-spacing:.08em}
+  .overview-card strong{display:block;margin-top:5px;font:700 22px ui-monospace,SFMono-Regular,Menlo,monospace;color:#dfe2e7}
+  .overview-card strong.green{color:var(--green)}
+  .grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:start}
+  .panel{border:1px solid var(--border);background:rgba(255,255,255,.025);border-radius:6px;box-shadow:var(--shadow);overflow:hidden}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+  .eyebrow{font-family:"Arial Narrow",Inter,sans-serif;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#cfd2d8}
+  .sub{font:9.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted)}
+  .view-switch{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+  .switch{font-family:"Arial Narrow",Inter,sans-serif;font-weight:800;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:4px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted)}
+  .switch.active{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.15);color:var(--text)}
+  .hint{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--border);font-size:9.5px;color:#797d86;font-style:italic}
+  .hint b{color:var(--green);font-style:normal}
+  .weekbar{padding:9px 13px;background:rgba(96,122,168,.11);display:flex;align-items:baseline;gap:8px}
+  .weekbar .week{font-family:"Arial Narrow",Inter,sans-serif;font-size:12.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#cfd2d8}
+  .weekbar .dates{font:10px ui-monospace,SFMono-Regular,Menlo,monospace;color:#7e90b4}
+  .weekbar .line{margin-left:auto;font:9.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:#73767e}
+  .weekbar .line b{color:#9a9da4}
+  .table-head,.player{display:grid;grid-template-columns:28px minmax(0,1fr) 54px 55px 62px 24px;gap:8px;align-items:center;padding:0 10px}
+  .table-head{padding-top:8px;padding-bottom:5px;color:var(--muted2);font-family:"Arial Narrow",Inter,sans-serif;font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+  .table-head > div:not(:nth-child(2)){text-align:right}
+  .rows{padding-bottom:7px}
+  .player{width:100%;border:0;background:transparent;text-align:left;cursor:pointer;padding-top:5px;padding-bottom:5px;min-height:78px}
+  .player:hover .player-main{filter:brightness(1.12)}
+  .rank{font:10px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted2);text-align:right}
+  .player-main{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;min-width:0;padding:10px 12px;border-radius:6px;border:1px solid transparent;transition:.15s ease}
+  .player-main.start{background:rgba(46,184,119,.24);border-color:rgba(46,184,119,.72)}
+  .player-main.lean{background:rgba(88,190,132,.24)}
+  .player-main.sit{background:rgba(232,78,78,.14);border-color:rgba(232,78,78,.35)}
+  .player-main .name{font-family:"Arial Narrow",Inter,sans-serif;font-size:14px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .player-main .identity{min-width:0}.player-main .player-meta{display:block;margin-top:4px;color:#8e939d;font:9px ui-monospace,SFMono-Regular,Menlo,monospace}
+  .player-main .recommendation{text-align:right;font-family:"Arial Narrow",Inter,sans-serif;font-weight:900;font-size:10px;letter-spacing:.07em;text-transform:uppercase}
+  .recommendation.start{color:var(--green)}.recommendation.lean{color:var(--yellow)}.recommendation.sit{color:#f07c7c}
+  .tag{font:8.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:#a0a4ac;border:1px solid rgba(255,255,255,.13);border-radius:3px;padding:1px 3px;flex-shrink:0}
+  .matchup{font:9px ui-monospace,SFMono-Regular,Menlo,monospace;color:#8e939d;white-space:nowrap;flex-shrink:0}
+  .matchup b{color:#e7e9ed}
+  .metric{font:9.5px ui-monospace,SFMono-Regular,Menlo,monospace;text-align:right;color:#aeb2bb}
+  .metric.positive{color:#55bd8e}.metric.warning{color:#e2be45}.metric.negative{color:#d67272}
+  .projection{justify-self:end;display:inline-flex;align-items:center;justify-content:center;min-width:52px;padding:5px 6px;border-radius:4px;border:1px solid var(--border);background:rgba(255,255,255,.05);font:9px ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;color:#b0b4bc}
+  .watch-star{border:0;background:transparent;color:#73767e;cursor:pointer;font-size:17px;line-height:1;padding:0}.watch-star.active{color:var(--yellow)}.watch-star:hover{color:#fff}
+  .detail{display:none;border-top:1px solid var(--border);padding:14px;background:rgba(8,10,14,.6)}
+  .detail.show{display:block}
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .hero{padding:12px;border:1px solid var(--border);background:rgba(255,255,255,.018);border-radius:6px}
+  .hero-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .player-name{font-family:"Arial Narrow",Inter,sans-serif;font-size:21px;font-weight:800;letter-spacing:-.01em}
+  .status{font-family:"Arial Narrow",Inter,sans-serif;font-weight:900;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;border-radius:4px}
+  .status.start{color:var(--green);background:rgba(52,199,130,.12);border:1px solid rgba(52,199,130,.34)}
+  .status.sit{color:#f07c7c;background:rgba(232,78,78,.12);border:1px solid rgba(232,78,78,.28)}
+  .meta{margin-top:4px;color:#777b84;font:9.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+  .reason{margin-top:10px;font-size:11px;line-height:1.5;color:#aeb2ba}
+  .card{border:1px solid var(--border);background:rgba(255,255,255,.018);border-radius:6px;padding:12px}
+  .card-title{font-family:"Arial Narrow",Inter,sans-serif;font-size:9.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#aeb2ba;margin-bottom:10px}
+  .bars{display:grid;gap:9px}
+  .bar-row{display:grid;grid-template-columns:92px 1fr 34px;align-items:center;gap:8px;font-size:10px;color:#8c919a}
+  .bar{height:7px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}
+  .fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#2eb877,#6bd39e)}
+  .bar-val{text-align:right;font:9px ui-monospace,SFMono-Regular,Menlo,monospace;color:#b6bac2}
+  .right{position:sticky;top:18px}.side-action{width:100%;margin-top:12px;border:1px solid rgba(52,199,130,.4);background:rgba(52,199,130,.1);color:var(--green);border-radius:5px;padding:8px;font:800 10px "Arial Narrow",Inter,sans-serif;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}.side-action:hover{background:rgba(52,199,130,.18)}
+  .side-card{border:1px solid var(--border);background:rgba(255,255,255,.025);border-radius:6px;padding:12px;margin-bottom:12px}
+  .side-title{font-family:"Arial Narrow",Inter,sans-serif;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#aeb2ba;margin-bottom:10px}
+  .score{display:flex;align-items:flex-end;gap:8px}
+  .score-num{font:700 36px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--green)}
+  .score-label{font:9px ui-monospace,SFMono-Regular,Menlo,monospace;color:#73767e;padding-bottom:4px}
+  .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}
+  .mini{border:1px solid var(--border);border-radius:5px;padding:8px;background:rgba(255,255,255,.018)}
+  .mini span{display:block;font:8px ui-monospace,SFMono-Regular,Menlo,monospace;color:#6f737b;text-transform:uppercase;letter-spacing:.08em}
+  .mini strong{display:block;margin-top:3px;font:12px ui-monospace,SFMono-Regular,Menlo,monospace;color:#c8cbd1}
+  .watch{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .watch button{border:0;background:transparent;color:var(--green);cursor:pointer;font:9px ui-monospace,SFMono-Regular,Menlo,monospace}
+  .watchlist{display:grid;gap:7px}
+  .watch-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 8px;border:1px solid var(--border);border-radius:5px;background:rgba(255,255,255,.015);font-size:10px}
+  .watch-item small{color:#777b84;font:8.5px ui-monospace,SFMono-Regular,Menlo,monospace}
+  .mobile-note{margin-top:8px;font-size:9px;color:#666a72;line-height:1.45}
+  .sit-copy{color:#e84e4e}.watch-title{margin:0}.watchlist{margin-top:10px}
+  .side-list{display:grid;gap:8px}.side-list-item{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:10px}.side-list-item strong{font-family:"Arial Narrow",Inter,sans-serif;font-size:11px}.side-list-item small{color:var(--muted);font:9px ui-monospace,SFMono-Regular,Menlo,monospace}.side-list-item b{font:10px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--green)}
+  @media (max-width:760px){
+    .top{align-items:flex-start}.controls{width:100%}.top{flex-direction:column}.search{flex:1;width:auto}
+    .grid{grid-template-columns:1fr}.right{position:static}
+  }
+  @media (max-width:560px){
+    body{padding:20px 10px 48px}.table-head,.player{grid-template-columns:24px minmax(0,1fr) 44px 46px 54px 20px;gap:5px}
+    .matchup{font-size:8px}.metric{font-size:8.5px}.player-main .name{font-size:11.5px}
+    .view-switch{justify-content:flex-start}.panel-head{align-items:flex-start;flex-direction:column}
+    .detail-grid{grid-template-columns:1fr}.detail-grid .hero{grid-column:auto}.overview{grid-template-columns:1fr 1fr}.overview-card strong{font-size:18px}.player{grid-template-columns:22px minmax(0,1fr) 44px 46px 54px 20px}.player-main{padding:9px 8px}.player-main .name{font-size:12px}.player-main .player-meta{font-size:8px}.watch-star{font-size:15px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand">
+      <div class="brand-row">
+        <div class="logo">SitStart<span>Charts</span></div>
+      </div>
+      <div class="product-name">NFL Fantasy Football</div>
+    </div>
+    <div class="controls">
+      <label class="search"><span>⌕</span><input id="search" placeholder="Search players..." aria-label="Search players" /></label>
+      <button class="signin" id="watchJump">☆ Watchlist</button>
+      <button class="signin" id="demoBtn">Profile / Demo</button>
+    </div>
+  </div>
+
+  <section class="banner" id="assignmentBanner">
+    <button id="assignmentToggle"><span class="chev">›</span><strong>Student exercise</strong></button>
+    <div class="banner-copy">
+      This is intentionally a frontend-only football sandbox. Remodel the hierarchy, interactions, terminology, and visuals as you see fit. The data is fake. The goal is to explore what a SitStartCharts football experience could become—not to reproduce this screen exactly.
+    </div>
+  </section>
+
+  <div class="tabs-wrap">
+    <div class="position-tabs" id="positionTabs"></div>
+  </div>
+
+  <section class="overview" aria-label="Weekly overview">
+    <div class="overview-card"><span>Players analyzed</span><strong id="overviewPlayers">18</strong></div>
+    <div class="overview-card"><span>Start recommendations</span><strong class="green" id="overviewStarts">11</strong></div>
+    <div class="overview-card"><span>Sit recommendations</span><strong id="overviewSits">4</strong></div>
+    <div class="overview-card"><span>Lean starts</span><strong id="overviewLeans">3</strong></div>
+  </section>
+
+  <div class="grid">
+    <main class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="eyebrow">Start / Sit recommendations</div>
+          <div class="sub">Week 2 · Sep 13 - Sep 19 · all values are demo data</div>
+        </div>
+        <div class="view-switch" id="viewSwitch">
+          <button class="switch active" data-view="ranked">Ranked</button>
+          <button class="switch" data-view="matchups">Matchups</button>
+          <button class="switch" data-view="projections">Projections</button>
+        </div>
+      </div>
+      <div class="hint">↗ <span>Click any player for the detailed breakdown — <b>START</b> vs <b class="sit-copy">SIT</b></span></div>
+      <div class="weekbar"><span class="week">This week</span><span class="dates">9/13–9/19</span><span class="line">start line <b>16.5</b></span></div>
+      <div class="table-head"><div></div><div>Player · matchup</div><div>Own</div><div>Edge</div><div>Proj</div></div>
+      <div class="rows" id="rows"></div>
+    </main>
+
+    <aside class="right">
+      <div class="side-card">
+        <div class="side-title">Selected player</div>
+        <div class="score"><div class="score-num" id="sideScore">87</div><div class="score-label">START<br>CONFIDENCE</div></div>
+        <div class="mini-grid">
+          <div class="mini"><span>Projection</span><strong id="sideProj">24.8</strong></div>
+          <div class="mini"><span>Matchup</span><strong id="sideMatchup">MIA · 22nd</strong></div>
+          <div class="mini"><span>Floor</span><strong id="sideFloor">19.1</strong></div>
+          <div class="mini"><span>Ceiling</span><strong id="sideCeil">31.4</strong></div>
+        </div>
+        <button class="side-action" id="sideWatch">☆ Add to Watchlist</button>
+        <div class="mobile-note">Use this card as a starting point. A football version may want a very different summary.</div>
+      </div>
+
+      <div class="side-card">
+        <div class="side-title">Top starts</div>
+        <div class="side-list" id="topStarts"></div>
+      </div>
+
+      <div class="side-card">
+        <div class="side-title">Players to avoid</div>
+        <div class="side-list" id="avoidList"></div>
+      </div>
+
+      <div class="side-card" id="watchCard">
+        <div class="watch"><div class="side-title watch-title">My watchlist</div><button id="clearWatch">clear</button></div>
+        <div class="watchlist" id="watchlist"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+// ========================= EDIT HERE =========================
+// The intended exercise is to change the UI. The data below is fake.
+const players = [
+  {id:1,name:'Josh Allen',team:'BUF',pos:'QB',opp:'MIA',home:false,own:99,edge:0.18,proj:24.8,conf:87,floor:19.1,ceil:31.4,status:'START',rank:1,matchupRank:22,reason:'Strong passing environment with rushing equity and a favorable matchup profile.'},
+  {id:2,name:'Jalen Hurts',team:'PHI',pos:'QB',opp:'DAL',home:true,own:98,edge:0.11,proj:23.9,conf:84,floor:18.2,ceil:29.6,status:'START',rank:2,matchupRank:19,reason:'High red-zone usage and a stable rushing floor keep the projection elevated.'},
+  {id:3,name:'Lamar Jackson',team:'BAL',pos:'QB',opp:'CIN',home:false,own:99,edge:0.07,proj:23.1,conf:82,floor:17.5,ceil:30.8,status:'START',rank:3,matchupRank:15,reason:'Rushing ceiling is the differentiator; matchup is slightly above neutral.'},
+  {id:4,name:'C.J. Stroud',team:'HOU',pos:'QB',opp:'IND',home:true,own:94,edge:-0.02,proj:19.8,conf:68,floor:14.4,ceil:26.3,status:'LEAN START',rank:4,matchupRank:12,reason:'Solid passing setup, but less rushing contribution makes the range narrower.'},
+  {id:5,name:'Jordan Love',team:'GB',pos:'QB',opp:'DET',home:false,own:91,edge:-0.06,proj:18.2,conf:59,floor:13.0,ceil:25.2,status:'LEAN START',rank:5,matchupRank:28,reason:'Playable projection, but pressure risk and matchup volatility lower confidence.'},
+  {id:6,name:'Bo Nix',team:'DEN',pos:'QB',opp:'KC',home:true,own:71,edge:-0.12,proj:15.7,conf:38,floor:10.9,ceil:23.4,status:'SIT',rank:6,matchupRank:30,reason:'Lower expected efficiency and a difficult opponent make the median less attractive.'},
+  {id:7,name:'Bijan Robinson',team:'ATL',pos:'RB',opp:'CAR',home:false,own:99,edge:0.21,proj:21.6,conf:91,floor:15.8,ceil:28.9,status:'START',rank:1,matchupRank:8,reason:'Volume plus receiving work creates both a strong floor and slate-breaking ceiling.'},
+  {id:8,name:'Breece Hall',team:'NYJ',pos:'RB',opp:'TEN',home:true,own:97,edge:0.13,proj:19.7,conf:83,floor:14.1,ceil:27.1,status:'START',rank:2,matchupRank:11,reason:'Strong workload expectation with favorable scoring equity.'},
+  {id:9,name:'Saquon Barkley',team:'PHI',pos:'RB',opp:'DAL',home:true,own:99,edge:0.08,proj:19.3,conf:80,floor:13.8,ceil:26.7,status:'START',rank:3,matchupRank:18,reason:'Touchdown upside remains attractive in a high-usage role.'},
+  {id:10,name:'De\'Von Achane',team:'MIA',pos:'RB',opp:'BUF',home:false,own:96,edge:-0.01,proj:18.6,conf:66,floor:10.4,ceil:29.4,status:'LEAN START',rank:4,matchupRank:24,reason:'Explosive ceiling is intact, though the matchup creates more range in outcomes.'},
+  {id:11,name:'Amon-Ra St. Brown',team:'DET',pos:'WR',opp:'GB',home:true,own:99,edge:0.16,proj:20.2,conf:89,floor:15.5,ceil:27.8,status:'START',rank:1,matchupRank:10,reason:'Target concentration and route participation produce an elite weekly profile.'},
+  {id:12,name:'CeeDee Lamb',team:'DAL',pos:'WR',opp:'PHI',home:false,own:99,edge:0.03,proj:19.5,conf:78,floor:13.2,ceil:28.1,status:'START',rank:2,matchupRank:16,reason:'High-end volume keeps the projection sturdy even against a competitive secondary.'},
+  {id:13,name:'Puka Nacua',team:'LAR',pos:'WR',opp:'ARI',home:true,own:98,edge:0.10,proj:18.9,conf:86,floor:13.7,ceil:27.3,status:'START',rank:3,matchupRank:7,reason:'Volume plus yards-after-catch gives him one of the slate’s best target-driven ceilings.'},
+  {id:14,name:'DeAndre Hopkins',team:'BAL',pos:'WR',opp:'CIN',home:false,own:78,edge:-0.09,proj:11.8,conf:44,floor:7.2,ceil:18.9,status:'SIT',rank:4,matchupRank:21,reason:'Lower target certainty makes the median difficult to trust despite scoring upside.'},
+  {id:15,name:'Travis Kelce',team:'KC',pos:'TE',opp:'DEN',home:false,own:95,edge:0.04,proj:13.9,conf:70,floor:9.0,ceil:20.4,status:'LEAN START',rank:1,matchupRank:13,reason:'Red-zone involvement keeps him in the weekly mix even if volume fluctuates.'},
+  {id:16,name:'Sam LaPorta',team:'DET',pos:'TE',opp:'GB',home:true,own:93,edge:0.12,proj:14.8,conf:79,floor:10.1,ceil:21.9,status:'START',rank:2,matchupRank:9,reason:'Strong route participation and a favorable receiving matchup make the profile attractive.'},
+  {id:17,name:'George Kittle',team:'SF',pos:'TE',opp:'SEA',home:true,own:95,edge:0.08,proj:14.2,conf:76,floor:9.7,ceil:21.2,status:'START',rank:3,matchupRank:6,reason:'Big-play and touchdown paths create a strong ceiling in a favorable spot.'},
+  {id:18,name:'Kyle Pitts',team:'ATL',pos:'TE',opp:'CAR',home:false,own:67,edge:-0.08,proj:9.4,conf:47,floor:6.1,ceil:15.8,status:'SIT',rank:4,matchupRank:17,reason:'Routes are encouraging, but target and touchdown certainty remain too volatile.'}
+];
+// ======================= END EDIT ============================
+
+const state={pos:'ALL',view:'ranked',selectedId:1,watch:new Set([1,3])};
+const els={
+  rows:document.getElementById('rows'),tabs:document.getElementById('positionTabs'),search:document.getElementById('search'),
+  watchlist:document.getElementById('watchlist'),sideScore:document.getElementById('sideScore'),sideProj:document.getElementById('sideProj'),
+  sideMatchup:document.getElementById('sideMatchup'),sideFloor:document.getElementById('sideFloor'),sideCeil:document.getElementById('sideCeil'),
+  sideWatch:document.getElementById('sideWatch'),topStarts:document.getElementById('topStarts'),avoidList:document.getElementById('avoidList'),watchCard:document.getElementById('watchCard')
+};
+
+function fmtEdge(v){return (v>=0?'+':'')+v.toFixed(2)}
+function matchText(p){return `${p.home?'':'@'}${p.opp}`}
+function statusClass(s){return s==='START'?'start':s==='SIT'?'sit':'lean'}
+function positions(){return ['ALL','QB','RB','WR','TE','FLEX']}
+function filtered(){
+  const q=els.search.value.trim().toLowerCase();
+  return players.filter(p=>((state.pos==='ALL'||p.pos===state.pos||(state.pos==='FLEX'&&['RB','WR','TE'].includes(p.pos)))&&(!q||`${p.name} ${p.team} ${p.opp}`.toLowerCase().includes(q))));
+}
+function ordered(arr){
+  if(state.view==='matchups') return [...arr].sort((a,b)=>a.matchupRank-b.matchupRank);
+  if(state.view==='projections') return [...arr].sort((a,b)=>b.proj-a.proj);
+  return [...arr].sort((a,b)=>a.rank-b.rank);
+}
+function renderTabs(){
+  els.tabs.innerHTML='';
+  positions().forEach(pos=>{const b=document.createElement('button');b.className='pill'+(state.pos===pos?' active':'');b.textContent=pos;b.onclick=()=>{state.pos=pos;state.selectedId=(filtered()[0]?.id||null);render()};els.tabs.appendChild(b)});
+}
+function playerRow(p,i){
+  const b=document.createElement('div');b.className='player';b.dataset.id=p.id;b.setAttribute('role','button');b.tabIndex=0;
+  const edgeClass=p.edge>0.05?'positive':p.edge<-0.05?'negative':'warning';
+  const starred=state.watch.has(p.id);
+  b.innerHTML=`<div class="rank">${i+1}</div><div class="player-main ${statusClass(p.status)}"><div class="identity"><span class="name">${p.name}</span><span class="player-meta"><span class="tag">${p.team}</span> · ${p.pos} · ${p.home?'vs':'@'} ${p.opp}</span></div><div><div class="recommendation ${statusClass(p.status)}">${p.status}</div><div class="player-meta">${p.conf}% confidence</div></div></div><div class="metric">${p.own}%</div><div class="metric ${edgeClass}">${fmtEdge(p.edge)}</div><div class="projection">${p.proj.toFixed(1)}</div><button class="watch-star ${starred?'active':''}" aria-label="${starred?'Remove':'Add'} ${p.name} ${starred?'from':'to'} watchlist">${starred?'★':'☆'}</button>`;
+  b.onclick=()=>{state.selectedId=p.id;renderRows();renderDetail();highlightSelection()};
+  b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();b.click()}};
+  b.querySelector('.watch-star').onclick=e=>{e.stopPropagation();toggleWatch(p.id)};
+  return b;
+}
+function renderRows(){
+  els.rows.innerHTML='';
+  const arr=ordered(filtered());
+  if(!arr.length){els.rows.innerHTML='<div style="padding:24px 14px;color:#6e727a;font-size:11px">No players match that search.</div>';return}
+  arr.forEach((p,i)=>{
+    els.rows.appendChild(playerRow(p,i));
+    if(p.id===state.selectedId) els.rows.appendChild(detailNode(p));
+  });
+}
+function detailNode(p){
+  const wrap=document.createElement('div');wrap.className='detail show';wrap.dataset.detail=p.id;
+  const stats=[['Projection',Math.min(100,(p.proj/30)*100),p.proj.toFixed(1)],['Floor',Math.min(100,(p.floor/20)*100),p.floor.toFixed(1)],['Ceiling',Math.min(100,(p.ceil/35)*100),p.ceil.toFixed(1)],['Confidence',p.conf,p.conf+'%']];
+  const fantasyStats=statProfile(p);
+  wrap.innerHTML=`<div class="detail-grid"><div class="hero"><div class="hero-top"><div><div class="player-name">${p.name}</div><div class="meta">${p.team} · ${p.pos} · ${p.home?'HOME':'AWAY'} · ${matchText(p)}</div></div><div class="status ${statusClass(p.status)}">${p.status}</div></div><div class="reason">${p.reason}</div><div class="stats-table">${fantasyStats.map(s=>`<div class="stat-box"><span>${s[0]}</span><strong>${s[1]}</strong></div>`).join('')}</div></div><div class="card"><div class="card-title">Weekly profile</div><div class="bars">${stats.map(s=>`<div class="bar-row"><div>${s[0]}</div><div class="bar"><div class="fill" style="width:${s[1]}%"></div></div><div class="bar-val">${s[2]}</div></div>`).join('')}</div></div></div>`;
+  return wrap;
+}
+function statProfile(p){
+  const profiles={QB:[['Passing yards','285'],['Passing TDs','2.1'],['Rushing yards','38'],['Rushing TDs','0.4']],RB:[['Carries','18'],['Rushing yards','92'],['Targets','4.8'],['Receptions','3.6']],WR:[['Targets','9.1'],['Receptions','6.2'],['Receiving yards','84'],['TDs','0.6']],TE:[['Targets','6.7'],['Receptions','4.8'],['Receiving yards','57'],['TDs','0.5']]};
+  return profiles[p.pos]||profiles.WR;
+}
+function renderDetail(){
+  const p=players.find(x=>x.id===state.selectedId)||filtered()[0];if(!p)return;
+  els.sideScore.textContent=p.conf;els.sideProj.textContent=p.proj.toFixed(1);els.sideMatchup.textContent=`${p.opp} · #${p.matchupRank}`;els.sideFloor.textContent=p.floor.toFixed(1);els.sideCeil.textContent=p.ceil.toFixed(1);
+  els.sideWatch.textContent=state.watch.has(p.id)?'★ Remove from Watchlist':'☆ Add to Watchlist';
+}
+function highlightSelection(){
+  document.querySelectorAll('.player').forEach(x=>x.style.outline=(Number(x.dataset.id)===state.selectedId?'1px solid rgba(255,255,255,.12)':'none'));
+}
+function renderWatch(){
+  const items=[...state.watch].map(id=>players.find(p=>p.id===id)).filter(Boolean);
+  els.watchlist.innerHTML=items.length?items.map(p=>`<div class="watch-item"><div><strong>${p.name}</strong><div><small>${p.pos} · ${matchText(p)} · ${p.proj.toFixed(1)}</small></div></div><button onclick="removeWatch(${p.id})">×</button></div>`).join(''):'<div style="font-size:10px;color:#666a72">No players yet.</div>';
+}
+function toggleWatch(id){state.watch.has(id)?state.watch.delete(id):state.watch.add(id);render()}
+window.removeWatch=id=>{state.watch.delete(id);renderWatch()}
+function renderSidebar(){
+  const starts=[...players].filter(p=>p.status==='START').sort((a,b)=>b.conf-a.conf).slice(0,3);
+  const avoid=[...players].filter(p=>p.status==='SIT').sort((a,b)=>a.proj-b.proj).slice(0,3);
+  els.topStarts.innerHTML=starts.map(p=>`<div class="side-list-item"><div><strong>${p.name}</strong><small>${p.pos} · ${p.conf}% confidence</small></div><b>${p.proj.toFixed(1)}</b></div>`).join('');
+  els.avoidList.innerHTML=avoid.map(p=>`<div class="side-list-item"><div><strong>${p.name}</strong><small>${p.pos} · SIT</small></div><b style="color:#f07c7c">${p.proj.toFixed(1)}</b></div>`).join('');
+  document.getElementById('overviewPlayers').textContent=players.length;
+  document.getElementById('overviewStarts').textContent=players.filter(p=>p.status==='START').length;
+  document.getElementById('overviewSits').textContent=players.filter(p=>p.status==='SIT').length;
+  document.getElementById('overviewLeans').textContent=players.filter(p=>p.status==='LEAN START').length;
+}
+function render(){renderTabs();renderRows();renderDetail();renderWatch();renderSidebar();highlightSelection();document.querySelectorAll('#viewSwitch .switch').forEach(x=>x.classList.toggle('active',x.dataset.view===state.view))}
+
+document.getElementById('assignmentToggle').onclick=()=>document.getElementById('assignmentBanner').classList.toggle('open');
+els.search.oninput=()=>{const f=filtered();if(!f.find(p=>p.id===state.selectedId))state.selectedId=f[0]?.id||null;render()};
+document.querySelectorAll('#viewSwitch .switch').forEach(b=>b.onclick=()=>{state.view=b.dataset.view;render()});
+document.getElementById('clearWatch').onclick=()=>{state.watch.clear();render()};
+els.sideWatch.onclick=()=>toggleWatch(state.selectedId);
+document.getElementById('watchJump').onclick=()=>els.watchCard.scrollIntoView({behavior:'smooth',block:'start'});
+document.getElementById('demoBtn').onclick=()=>{state.pos='ALL';state.view='ranked';state.selectedId=1;els.search.value='';render()};
+render();
+</script>
+</body>
+</html>
