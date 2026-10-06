@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>SitStartCharts — Football Prototype</title>
+<title>SitStartCharts | Matchday Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
   :root{
     --bg:#0a0c12; --panel:#101318; --panel2:#0d1015; --border:rgba(255,255,255,.08);
@@ -169,6 +172,137 @@
     .view-switch{justify-content:flex-start}.panel-head{align-items:flex-start;flex-direction:column}
     .detail-grid{grid-template-columns:1fr}.detail-grid .hero{grid-column:auto}.overview{grid-template-columns:1fr 1fr}.overview-card strong{font-size:18px}.player{grid-template-columns:22px minmax(0,1fr) 44px 46px 54px 20px}.player-main{padding:9px 8px}.player-main .name{font-size:12px}.player-main .player-meta{font-size:8px}.watch-star{font-size:15px}
   }
+
+  /* Matchday board: a high-contrast scouting sheet, not a dark card dashboard. */
+  :root{
+    --bg:#eef1eb;--panel:#fff;--panel2:#f5f7f3;--border:#dce3dc;
+    --text:#17231c;--muted:#647168;--muted2:#879188;--green:#167749;
+    --green2:rgba(22,119,73,.1);--yellow:#9a6a00;--red:#c7483d;--blue:#465fc0;
+    --shadow:0 8px 24px rgba(23,35,28,.06)
+  }
+  html,body{background:linear-gradient(180deg,#17231c 0 158px,#eef1eb 158px 100%);color:var(--text);font-family:"IBM Plex Sans",sans-serif}
+  body{padding:24px 22px 56px}
+  .app{max-width:1280px}
+  .top{padding:16px 18px;margin-bottom:16px;background:#17231c;border-top:3px solid #d6f45b;border-radius:4px;align-items:center}
+  .logo{font-family:"Barlow Condensed",sans-serif;font-size:32px;font-weight:900;letter-spacing:0;color:#f5f7f1}
+  .logo span{color:#d6f45b}
+  .product-name{color:#aab8ac;font-size:10px;letter-spacing:.13em}
+  .brand-row{justify-content:flex-start;gap:18px}
+  .matchday-mark{display:flex;align-items:center;gap:7px;color:#dfe8de;font:500 10px "IBM Plex Mono",monospace;letter-spacing:.04em}
+  .matchday-mark b{color:#d6f45b}
+  .live-dot{width:7px;height:7px;border-radius:50%;background:#d6f45b;box-shadow:0 0 0 3px rgba(214,244,91,.13)}
+  .updated{color:#abb6ad}
+  .search{width:250px;background:#26352b;border-color:#3c4b40;border-radius:4px}
+  .search span,.search input{color:#f5f7f1}
+  .search input::placeholder{color:#a3afa5}
+  .search:focus-within{border-color:#d6f45b;box-shadow:0 0 0 2px rgba(214,244,91,.16)}
+  .signin{border-radius:4px;padding:9px 12px;font-family:"IBM Plex Sans",sans-serif;font-size:11px;letter-spacing:0}
+  #watchJump{color:#f4f7f2;background:transparent;border-color:#59685d}
+  #watchJump:hover{background:#26352b}
+  #demoBtn{color:#17231c;background:#d6f45b;border-color:#d6f45b}
+  #demoBtn:hover{background:#e2fa82}
+  .banner{margin-bottom:14px;background:#fff;border-color:var(--border);border-radius:4px}
+  .banner button{padding:10px 13px}
+  .banner strong{font-family:"IBM Plex Sans",sans-serif;font-size:10px;letter-spacing:.08em;color:#48574c}
+  .chev{color:#167749}
+  .banner-copy{color:#647168;font-size:11px}
+  .tabs-wrap{margin:14px 0 12px}
+  .position-tabs{gap:0;border-bottom:1px solid #cbd5cc}
+  .pill{padding:9px 15px;border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;color:#647168;font-family:"IBM Plex Sans",sans-serif;font-size:10px;letter-spacing:.04em}
+  .pill:hover{color:#17231c;background:rgba(255,255,255,.55)}
+  .pill.active{color:#17231c;background:transparent;border-bottom-color:#167749;box-shadow:none}
+  .overview{gap:9px;margin-bottom:12px}
+  .overview-card{position:relative;overflow:hidden;padding:12px 14px;background:#fff;border:1px solid var(--border);border-radius:4px;box-shadow:0 2px 8px rgba(23,35,28,.025)}
+  .overview-card:before{position:absolute;inset:0 auto 0 0;width:3px;background:#167749;content:""}
+  .overview-card:nth-child(2):before{background:#d6f45b}
+  .overview-card:nth-child(3):before{background:#e36b55}
+  .overview-card:nth-child(4):before{background:#647de0}
+  .overview-card span{color:#657269;font:500 9px "IBM Plex Mono",monospace;letter-spacing:.04em}
+  .overview-card strong{color:#17231c;font:700 24px "Barlow Condensed",sans-serif}
+  .overview-card strong.green{color:#167749}
+  .grid{grid-template-columns:minmax(0,1fr) 300px;gap:12px}
+  .panel,.side-card{border:1px solid var(--border);border-radius:4px;background:#fff;box-shadow:var(--shadow)}
+  .panel-head{padding:14px 15px;background:#fff;border-bottom:1px solid var(--border)}
+  .eyebrow{font-family:"Barlow Condensed",sans-serif;font-size:17px;letter-spacing:0;color:#17231c}
+  .sub{margin-top:3px;color:#68756c;font:10px "IBM Plex Mono",monospace}
+  .view-switch{gap:0;border:1px solid var(--border);border-radius:4px;padding:2px;background:#f2f5f1}
+  .switch{padding:6px 9px;border:0;border-radius:2px;color:#667269;font:600 9px "IBM Plex Sans",sans-serif;letter-spacing:.03em}
+  .switch:hover{color:#17231c;background:#fff}
+  .switch.active{background:#17231c;color:#fff}
+  .hint{padding:8px 15px;background:#f7f9f6;border-color:var(--border);color:#68756c;font-size:10px;font-style:normal}
+  .hint b{color:#167749}
+  .hint .sit-copy{color:#c7483d}
+  .weekbar{padding:10px 15px;background:#e5eddf;border-bottom:1px solid #d4dfd4}
+  .weekbar .week{font-family:"Barlow Condensed",sans-serif;font-size:16px;letter-spacing:.02em;color:#17231c}
+  .weekbar .dates{color:#526754;font-size:10px}
+  .weekbar .line{color:#68756c;font-size:9px}
+  .weekbar .line b{color:#17231c}
+  .table-head{padding:9px 14px 6px;color:#79857c;font:600 9px "IBM Plex Mono",monospace;letter-spacing:.02em}
+  .player{padding:5px 12px;min-height:58px;border-bottom:1px solid #edf0ec}
+  .player:hover{background:#f8faf7}
+  .rank,.metric,.projection,.player-meta,.matchup,.bar-val{font-family:"IBM Plex Mono",monospace}
+  .rank{color:#859087}
+  .player-main{padding:8px 10px;border-radius:3px}
+  .player-main.start{background:#e8f4e9;border-color:#c6dfca;box-shadow:inset 3px 0 #167749}
+  .player-main.lean{background:#fff5d8;border:1px solid #f0dfaa;box-shadow:inset 3px 0 #c38b0b}
+  .player-main.sit{background:#fff0ed;border-color:#f0d0ca;box-shadow:inset 3px 0 #c7483d}
+  .player-main .name{font-family:"Barlow Condensed",sans-serif;font-size:16px;font-weight:700;letter-spacing:0;color:#17231c}
+  .player-main .player-meta{color:#657269;font-size:9px}
+  .recommendation.start{color:#167749}.recommendation.lean{color:#936500}.recommendation.sit{color:#c7483d}
+  .tag{color:#536157;border-color:#c9d2ca;background:rgba(255,255,255,.5)}
+  .matchup{color:#647168}.matchup b{color:#17231c}
+  .metric{color:#47564b}.metric.positive{color:#167749}.metric.warning{color:#9a6a00}.metric.negative{color:#c7483d}
+  .projection{border:1px solid #dce3dc;border-radius:3px;background:#f5f7f3;color:#17231c}
+  .player:hover .projection{border-color:#167749;color:#167749}
+  .watch-star{color:#98a198}.watch-star.active{color:#b17a00}
+  .detail{padding:12px;background:#f6f8f5;border-color:#dce3dc}
+  .hero,.card{border:1px solid #dce3dc;border-radius:4px;background:#fff}
+  .player-name{font-family:"Barlow Condensed",sans-serif;font-size:25px;letter-spacing:0;color:#17231c}
+  .meta{color:#68756c;font-family:"IBM Plex Mono",monospace}
+  .reason{color:#526057}
+  .status{border-radius:3px}
+  .status.start{color:#167749;background:#e8f4e9;border-color:#c6dfca}
+  .status.sit{color:#c7483d;background:#fff0ed;border-color:#f0d0ca}
+  .stats-table{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:12px}
+  .stat-box{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px;border-left:3px solid #d6f45b;background:#f5f7f3;font-size:10px}
+  .stat-box span{color:#647168}
+  .stat-box strong{color:#17231c;font:600 11px "IBM Plex Mono",monospace}
+  .card-title,.side-title{color:#46544a;font-family:"IBM Plex Sans",sans-serif;letter-spacing:.08em}
+  .bar{height:7px;border-radius:2px;background:#e7ece7}
+  .fill{border-radius:2px;background:#167749;box-shadow:none}
+  .right{top:16px}
+  .side-card{padding:13px;margin-bottom:10px}
+  .score-num{font-family:"Barlow Condensed",sans-serif;font-size:48px;color:#167749;text-shadow:none}
+  .score-label,.mini span{color:#6b786e;font-family:"IBM Plex Mono",monospace}
+  .mini{border:1px solid #e0e6e0;border-radius:3px;background:#f8faf7}
+  .mini:hover{background:#f0f5ee;border-color:#cbd8cb}
+  .mini strong{color:#17231c;font-family:"IBM Plex Mono",monospace}
+  .side-action{border:0;border-radius:3px;background:#167749;color:#fff;font-family:"IBM Plex Sans",sans-serif}
+  .side-action:hover{background:#105c38}
+  .side-list-item strong{color:#17231c;font-family:"IBM Plex Sans",sans-serif}
+  .side-list-item small{color:#6b786e;font-family:"IBM Plex Mono",monospace}
+  .side-list-item b{color:#167749}
+  .watch button{color:#526754}
+  .watch-item{padding:8px;border:1px solid #e0e6e0;border-radius:3px;background:#fafbf9}
+  .watch-item strong{color:#17231c}
+  .watch-item small{color:#68756c}
+  .watch-item:hover{background:#f0f5ee;border-color:#cbd8cb}
+  .watch-footnote{margin-top:8px;color:#758178;font:9px "IBM Plex Mono",monospace}
+  .roster-actions{display:flex;align-items:center;gap:8px}
+  .roster-actions button{padding:3px 5px;border:1px solid #dce3dc;border-radius:3px;background:#fff;color:#526754;font:600 9px "IBM Plex Sans",sans-serif;cursor:pointer}
+  .roster-actions button:hover{border-color:#167749;color:#167749}
+  .roster-importer{display:grid;gap:7px;margin-top:10px;padding:10px;background:#f5f7f3;border:1px solid #dce3dc;border-radius:3px}
+  .roster-importer[hidden]{display:none}
+  .roster-importer label{color:#46544a;font:600 9px "IBM Plex Mono",monospace;text-transform:uppercase}
+  .roster-importer textarea{width:100%;resize:vertical;padding:8px;border:1px solid #cbd5cc;border-radius:3px;background:#fff;color:#17231c;font:11px/1.5 "IBM Plex Sans",sans-serif}
+  .roster-importer textarea:focus{outline:2px solid rgba(22,119,73,.2);border-color:#167749}
+  .roster-importer .import-submit{padding:7px 9px;border:0;border-radius:3px;background:#167749;color:#fff;font:600 10px "IBM Plex Sans",sans-serif;cursor:pointer}
+  .roster-importer .import-submit:hover{background:#105c38}
+  .import-status{margin:0;color:#526057;font-size:10px;line-height:1.5}
+  .mobile-note{color:#758178}
+  ::-webkit-scrollbar-track{background:#eef1eb}::-webkit-scrollbar-thumb{background:#bdc8be}::-webkit-scrollbar-thumb:hover{background:#89988c}
+  @media(max-width:760px){html,body{background:linear-gradient(180deg,#17231c 0 220px,#eef1eb 220px 100%)}.top{padding:14px}.grid{grid-template-columns:1fr}.right{position:static}}
+  @media(max-width:560px){body{padding:12px 9px 34px}.top{gap:12px}.brand-row{gap:10px}.matchday-mark{font-size:9px}.logo{font-size:28px}.search{width:auto}.overview{gap:6px}.overview-card{padding:10px}.overview-card span{font-size:8px}.overview-card strong{font-size:21px}.position-tabs{overflow-x:auto;flex-wrap:nowrap}.pill{flex:0 0 auto;padding:9px 12px}.player{padding-left:5px;padding-right:5px}.player-main .name{font-size:14px}}
 </style>
 </head>
 <body>
@@ -177,6 +311,7 @@
     <div class="brand">
       <div class="brand-row">
         <div class="logo">SitStart<span>Charts</span></div>
+        <div class="matchday-mark"><span class="live-dot"></span> WEEK 02 <b>·</b> 2026</div>
       </div>
       <div class="product-name">NFL Fantasy Football</div>
     </div>
@@ -188,9 +323,9 @@
   </div>
 
   <section class="banner" id="assignmentBanner">
-    <button id="assignmentToggle"><span class="chev">›</span><strong>Student exercise</strong></button>
+    <button id="assignmentToggle"><span class="chev">›</span><strong>Demo projections · no live ESPN connection</strong></button>
     <div class="banner-copy">
-      This is intentionally a frontend-only football sandbox. Remodel the hierarchy, interactions, terminology, and visuals as you see fit. The data is fake. The goal is to explore what a SitStartCharts football experience could become—not to reproduce this screen exactly.
+      Player projections are sample data. Add your players with the star controls; your watchlist is saved in this browser only and is not synced with ESPN.
     </div>
   </section>
 
@@ -249,8 +384,15 @@
       </div>
 
       <div class="side-card" id="watchCard">
-        <div class="watch"><div class="side-title watch-title">My watchlist</div><button id="clearWatch">clear</button></div>
+        <div class="watch"><div class="side-title watch-title">My watchlist</div><div class="roster-actions"><button id="rosterToggle" type="button" aria-expanded="false" aria-controls="rosterImporter">Import names</button><button id="clearWatch" type="button">clear</button></div></div>
+        <div class="roster-importer" id="rosterImporter" hidden>
+          <label for="rosterInput">Paste ESPN player names</label>
+          <textarea id="rosterInput" rows="4" placeholder="Josh Allen&#10;Amon-Ra St. Brown"></textarea>
+          <button class="import-submit" id="importRoster" type="button">Add matching players</button>
+          <p class="import-status" id="importStatus" aria-live="polite"></p>
+        </div>
         <div class="watchlist" id="watchlist"></div>
+        <div class="watch-footnote">Saved in this browser · sample player pool · no ESPN sync</div>
       </div>
     </aside>
   </div>
@@ -281,7 +423,13 @@ const players = [
 ];
 // ======================= END EDIT ============================
 
-const state={pos:'ALL',view:'ranked',selectedId:1,watch:new Set([1,3])};
+function readWatchlist(){
+  try{
+    const ids=JSON.parse(localStorage.getItem('ssc-watchlist')||'[]');
+    return Array.isArray(ids)?ids.filter(id=>players.some(p=>p.id===id)):[];
+  }catch{return []}
+}
+const state={pos:'ALL',view:'ranked',selectedId:1,watch:new Set(readWatchlist())};
 const els={
   rows:document.getElementById('rows'),tabs:document.getElementById('positionTabs'),search:document.getElementById('search'),
   watchlist:document.getElementById('watchlist'),sideScore:document.getElementById('sideScore'),sideProj:document.getElementById('sideProj'),
@@ -348,8 +496,30 @@ function renderWatch(){
   const items=[...state.watch].map(id=>players.find(p=>p.id===id)).filter(Boolean);
   els.watchlist.innerHTML=items.length?items.map(p=>`<div class="watch-item"><div><strong>${p.name}</strong><div><small>${p.pos} · ${matchText(p)} · ${p.proj.toFixed(1)}</small></div></div><button onclick="removeWatch(${p.id})">×</button></div>`).join(''):'<div style="font-size:10px;color:#666a72">No players yet.</div>';
 }
-function toggleWatch(id){state.watch.has(id)?state.watch.delete(id):state.watch.add(id);render()}
-window.removeWatch=id=>{state.watch.delete(id);renderWatch()}
+function persistWatchlist(){try{localStorage.setItem('ssc-watchlist',JSON.stringify([...state.watch]))}catch{}}
+function toggleWatch(id){state.watch.has(id)?state.watch.delete(id):state.watch.add(id);persistWatchlist();render()}
+window.removeWatch=id=>{state.watch.delete(id);persistWatchlist();render()}
+function normalizePlayerName(value){return value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+function importRoster(){
+  const status=document.getElementById('importStatus');
+  const names=[...new Set(document.getElementById('rosterInput').value.split(/[\n,]+/).map(name=>name.trim()).filter(Boolean))];
+  if(!names.length){status.textContent='Paste one or more player names first.';return}
+  const playerByName=new Map(players.map(player=>[normalizePlayerName(player.name),player]));
+  const matched=[...new Set(names.map(name=>playerByName.get(normalizePlayerName(name))).filter(Boolean))];
+  const missing=names.filter(name=>!playerByName.has(normalizePlayerName(name)));
+  const added=matched.filter(player=>!state.watch.has(player.id));
+  added.forEach(player=>state.watch.add(player.id));
+  if(added.length){persistWatchlist();render()}
+  const already=matched.length-added.length;
+  status.textContent=`Matched ${matched.length}; added ${added.length}${already?`; already listed ${already}`:''}.${missing.length?` Not in this sample pool: ${missing.join(', ')}.`:''}`;
+}
+document.getElementById('rosterToggle').onclick=event=>{
+  const panel=document.getElementById('rosterImporter');
+  panel.hidden=!panel.hidden;
+  event.currentTarget.setAttribute('aria-expanded',String(!panel.hidden));
+  if(!panel.hidden)document.getElementById('rosterInput').focus();
+};
+document.getElementById('importRoster').onclick=importRoster;
 function renderSidebar(){
   const starts=[...players].filter(p=>p.status==='START').sort((a,b)=>b.conf-a.conf).slice(0,3);
   const avoid=[...players].filter(p=>p.status==='SIT').sort((a,b)=>a.proj-b.proj).slice(0,3);
@@ -365,7 +535,7 @@ function render(){renderTabs();renderRows();renderDetail();renderWatch();renderS
 document.getElementById('assignmentToggle').onclick=()=>document.getElementById('assignmentBanner').classList.toggle('open');
 els.search.oninput=()=>{const f=filtered();if(!f.find(p=>p.id===state.selectedId))state.selectedId=f[0]?.id||null;render()};
 document.querySelectorAll('#viewSwitch .switch').forEach(b=>b.onclick=()=>{state.view=b.dataset.view;render()});
-document.getElementById('clearWatch').onclick=()=>{state.watch.clear();render()};
+document.getElementById('clearWatch').onclick=()=>{state.watch.clear();persistWatchlist();render()};
 els.sideWatch.onclick=()=>toggleWatch(state.selectedId);
 document.getElementById('watchJump').onclick=()=>els.watchCard.scrollIntoView({behavior:'smooth',block:'start'});
 document.getElementById('demoBtn').onclick=()=>{state.pos='ALL';state.view='ranked';state.selectedId=1;els.search.value='';render()};
